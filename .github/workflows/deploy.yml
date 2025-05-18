@@ -38,9 +38,7 @@ jobs:
 
       - name: Build and push Docker image to ECR
         uses: docker/build-push-action@v5
-        env:
-          IMAGE_TAG: ${{ steps.get-commit-hash.outputs.commit-hash }}-${{ steps.get-timestamp.outputs.timestamp }}
         with:
           context: .
           push: true
-          tags: 975050082420.dkr.ecr.us-east-1.amazonaws.com/simply-python-app:${{ IMAGE_TAG }}
+          tags: 975050082420.dkr.ecr.us-east-1.amazonaws.com/simply-python-app:${{ steps.get-commit-hash.outputs.commit-hash }}-${{ steps.get-timestamp.outputs.timestamp }}
