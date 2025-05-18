@@ -9,6 +9,14 @@ on:
 
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    container: python:3.11  # This is similar to GitLab's 'image'
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install --no-cache-dir -r requirements.txt
+      - run: python app.py
+
   build:
     runs-on: ubuntu-latest
 
