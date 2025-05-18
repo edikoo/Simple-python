@@ -9,13 +9,6 @@ on:
 
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    container: python:3.11  # This is similar to GitLab's 'image'
-    steps:
-      - uses: actions/checkout@v4
-      - run: pip install --no-cache-dir -r requirements.txt
-      - run: python app.py
 
   build:
     runs-on: ubuntu-latest
@@ -24,12 +17,30 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Build Docker image
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Get commit hash
+        id: get-commit-hash
+        run: echo "::set-output name=commit-hash::$(git rev-parse --short HEAD)"
+
+      - name: Get timestamp
+        id: get-timestamp
+        run: echo "::set-output name=timestamp::$(date +'%Y-%m-%d-%H-%M')"
+
+      - name: Build and push Docker image to ECR
         uses: docker/build-push-action@v5
+        env:
+          IMAGE_TAG: ${{ steps.get-commit-hash.outputs.commit-hash }}-${{ steps.get-timestamp.outputs.timestamp }}
         with:
           context: .
-          push: false   # Set to true if you want to push to Docker Hub
-          tags: my-python-app:latest
+          push: true
+          tags: 975050082420.dkr.ecr.us-east-1.amazonaws.com/simply-python-app:${{ IMAGE_TAG }}
